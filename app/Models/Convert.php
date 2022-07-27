@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Convert extends Model
 {
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'transaction_id',
+        'dest_id'
+    ];
 }
