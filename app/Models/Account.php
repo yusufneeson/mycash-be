@@ -20,4 +20,9 @@ class Account extends Model
         'description',
         'icon'
     ];
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }
