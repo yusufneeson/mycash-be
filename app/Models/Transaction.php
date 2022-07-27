@@ -20,4 +20,14 @@ class Transaction extends Model
         'amount',
         'description'
     ];
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    public function convert()
+    {
+        return $this->hasOne(Convert::class);
+    }
 }
