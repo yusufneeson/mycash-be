@@ -19,7 +19,7 @@ class TransactionSeeder extends Seeder
     public function run()
     {
         User::factory(10)->create()->each(function ($user) {
-            Account::factory(5)->create()->each(function ($acc) use ($user) {
+            Account::factory(rand(2, 5))->create()->each(function ($acc) use ($user) {
                 $acc->user_id = $user->id;
                 $acc->save();
             });
@@ -34,40 +34,41 @@ class TransactionSeeder extends Seeder
                         ->where('id', '>', $acc->id)
                         ->first();
                     if ($del) {
-                        $del->delete();
-                        return false;
+                        $del->name = $del->name . '_2';
+                        $del->save();
                     }
 
                     return $acc;
                 });
 
-            $accounts->each(function ($a) use ($user) {
-                if (is_bool($a)) {
-                    dump($a, $user);
-                } else {
-                    // Transaction::factory(50)->create()->each(function ($t) use ($a) {
-                    //     $t->account_id = $a->id;
-                    //     $t->save();
-
-
-
-                    //     // if ($t->type == 'conv') {
-                    //     //     Convert::create([
-                    //     //         'transaction_id' => $t->id,
-                    //     //         'dest_id' => Account::query()
-                    //     //             ->where('user_id', $acc->user_id)
-                    //     //             ->get()
-                    //     //             ->shuffle()
-                    //     //             ->pluck('id')
-                    //     //             ->first()
-                    //     //     ]);
-                    //     // }
-                    // });
+            $accounts->each(function ($a) {
+                $cek = Transaction::where('account_id', $a->id)->first();
+                if (!$cek) {
+                    Transaction::create([
+                        'account_id' => $a->id,
+                        'type' => 'in',
+                        'amount' => random_int(230000, 8790000),
+                        'description' => 'Saldo Awal'
+                    ]);
                 }
+
+                Transaction::factory(50)->create()->each(function ($t) use ($a) {
+                    $t->account_id = $a->id;
+                    $t->save();
+
+                    if ($t->type == 'conv') {
+                        Convert::create([
+                            'transaction_id' => $t->id,
+                            'dest_id' => Account::query()
+                                ->where('user_id', $a->user_id)
+                                ->get()
+                                ->shuffle()
+                                ->pluck('id')
+                                ->first()
+                        ]);
+                    }
+                });
             });
-            // if (is_bool($accounts)) {
-            //     dd($accounts);
-            // }
         });
     }
 }
